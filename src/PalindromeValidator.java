@@ -7,24 +7,6 @@ import java.util.regex.Pattern;
  */
 public class PalindromeValidator {
 
-    /**
-     * 判断字符串是否回文
-     * @param str 参与判断的字符串
-     * @return 是返回true 否返回false
-     */
-    public static boolean isPalindrome(String str) {
-        char[] chars = str.toCharArray();
-        int length = chars.length;
-        int left = 0, right = length - 1;
-        while (left < right) {
-            if (chars[left ++] != chars[right --]) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     public PalindromeWrapper createPalindromeWrapper(String str) {
         return new PalindromeWrapper(str);
     }
@@ -45,17 +27,19 @@ public class PalindromeValidator {
         int length = chars.length;
         for (int i = 0; i < length - 1; i ++) {
             for (int j = i; j <length; j ++) {
-                int left = i, right = j;
+                int left = i, right = j, redundantSize = 0;
                 while (left < right) {
                     var leftStr = String.valueOf(chars[left]);
                     if (pattern.matcher(leftStr).matches() || " ".equals(leftStr)) {
                         left ++;
+                        redundantSize ++;
                         continue;
                     }
 
                     var rightStr = String.valueOf(chars[right]);
                     if (pattern.matcher(rightStr).matches() || " ".equals(rightStr)) {
                         right --;
+                        redundantSize ++;
                         continue;
                     }
 
@@ -67,9 +51,10 @@ public class PalindromeValidator {
                 }
 
                 //是回文字符串且长度大于当前回文，则更新wrapper
-                if (left >= right && j - i > palindromeWrapper.getLength()) {
+                if (left >= right && j - i - redundantSize > palindromeWrapper.getLength()) {
                     palindromeWrapper.setStart(i);
                     palindromeWrapper.setEnd(j);
+                    palindromeWrapper.setRedundantSize(redundantSize);
                 }
             }
         }
@@ -94,6 +79,11 @@ public class PalindromeValidator {
          */
         private int end;
 
+        /**
+         * 多余字符的长度
+         */
+        private int redundantSize;
+
         public void setStart(int start) {
             this.start = start;
         }
@@ -102,12 +92,20 @@ public class PalindromeValidator {
             this.end = end;
         }
 
+        public int getRedundantSize() {
+            return redundantSize;
+        }
+
+        public void setRedundantSize(int redundantSize) {
+            this.redundantSize = redundantSize;
+        }
+
         public PalindromeWrapper(String str) {
             this.str = str;
         }
 
         public int getLength() {
-            return end - start;
+            return end - start - redundantSize;
         }
 
         /**
